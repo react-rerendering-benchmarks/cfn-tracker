@@ -1,26 +1,21 @@
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { Icon } from '@iconify/react'
-import { Trans, useTranslation } from 'react-i18next'
-import { motion, useAnimate } from 'framer-motion'
-
-import * as Page from '@/ui/page'
-import * as Dialog from '@/ui/dialog'
-import { Button } from '@/ui/button'
-import { Checkbox } from '@/ui/checkbox'
-
-import { model } from '@model'
-import { GetThemes, OpenResultsDirectory } from '@cmd'
-
-import { useErrorPopup } from '@/main/error-popup'
-
-type StatOptions = Omit<
-  Record<keyof model.TrackingState, boolean>,
-  'totalLosses' | 'totalWins'
-> & {
-  theme: string
-}
-
+import { useRef } from "react";
+import { useCallback } from "react";
+import { memo } from "react";
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { Icon } from '@iconify/react';
+import { Trans, useTranslation } from 'react-i18next';
+import { motion, useAnimate } from 'framer-motion';
+import * as Page from '@/ui/page';
+import * as Dialog from '@/ui/dialog';
+import { Button } from '@/ui/button';
+import { Checkbox } from '@/ui/checkbox';
+import { model } from '@model';
+import { GetThemes, OpenResultsDirectory } from '@cmd';
+import { useErrorPopup } from '@/main/error-popup';
+type StatOptions = Omit<Record<keyof model.TrackingState, boolean>, 'totalLosses' | 'totalWins'> & {
+  theme: string;
+};
 const defaultOptions: StatOptions = {
   theme: 'default',
   cfn: false,
@@ -42,44 +37,52 @@ const defaultOptions: StatOptions = {
   userCode: false,
   timestamp: false,
   date: false
-}
-
-export function OutputPage() {
-  const { t } = useTranslation()
-  const [options, setOptions] = React.useState(defaultOptions)
-  const [scope, animate] = useAnimate()
-
-  const { theme: _, ...statOptions } = options
-
+};
+export const OutputPage = memo(function OutputPage() {
+  const {
+    t
+  } = useTranslation();
+  const [options, setOptions] = React.useState(defaultOptions);
+  const [scope, animate] = useAnimate();
+  const {
+    theme: _,
+    ...statOptions
+  } = options;
   function copyUrlToClipBoard() {
-    let url = `http://localhost:4242?theme=${options.theme}`
+    let url = `http://localhost:4242?theme=${options.theme}`;
     for (const [key, value] of Object.entries(options)) {
       if (key === 'theme') {
-        continue
+        continue;
       }
-      url += `&${key}=${value}`
+      url += `&${key}=${value}`;
     }
-
-    navigator.clipboard.writeText(url)
-
-    animate('#ok', { opacity: [0, 1], y: [0, -10] }, { delay: 0.125 }).then(() => {
-      animate('#ok', { opacity: [1, 0] }, { delay: 0.5 })
-    })
+    navigator.clipboard.writeText(url);
+    animate('#ok', {
+      opacity: [0, 1],
+      y: [0, -10]
+    }, {
+      delay: 0.125
+    }).then(() => {
+      animate('#ok', {
+        opacity: [1, 0]
+      }, {
+        delay: 0.5
+      });
+    });
   }
-
-  return (
-    <Page.Root>
+  return <Page.Root>
       <Page.Header>
         <Page.Title>{t('output')}</Page.Title>
       </Page.Header>
 
       <div className='z-40 h-full w-full overflow-y-scroll'>
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.125 }}
-          className='grid w-full gap-4 border-b-[1px] border-solid border-b-divider px-8 py-6'
-        >
+        <motion.section initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} transition={{
+        delay: 0.125
+      }} className='grid w-full gap-4 border-b-[1px] border-solid border-b-divider px-8 py-6'>
           <div className='flex items-center justify-between gap-8'>
             <div>
               <h2 className='text-2xl font-bold'>{t('usingBrowserSource')}</h2>
@@ -91,36 +94,34 @@ export function OutputPage() {
                 </Trans>
               </p>
               <div className='relative' ref={scope}>
-                <Icon
-                  icon='twemoji:ok-hand'
-                  width={45}
-                  id='ok'
-                  className='absolute right-7 top-0 opacity-0'
-                />
+                <Icon icon='twemoji:ok-hand' width={45} id='ok' className='absolute right-7 top-0 opacity-0' />
               </div>
-              <Button onClick={copyUrlToClipBoard} style={{ filter: 'hue-rotate(-120deg)' }}>
+              <Button onClick={copyUrlToClipBoard} style={{
+              filter: 'hue-rotate(-120deg)'
+            }}>
                 <Icon icon='mdi:internet' className='mr-3 h-6 w-6' />
                 {t('copyBrowserSourceLink')}
               </Button>
             </div>
             <div className='flex flex-col gap-4'>
-              <ThemeSelect
-                value={options.theme}
-                onSelect={theme => setOptions({ ...options, theme })}
-              />
-              <StatSelect
-                options={statOptions}
-                onSelect={(opt, checked) => setOptions({ ...options, [opt]: checked })}
-              />
+              <ThemeSelect value={options.theme} onSelect={useCallback(theme => setOptions(optionsCurrent => ({
+              ...optionsCurrent,
+              theme
+            })), [setOptions])} />
+              <StatSelect options={statOptions} onSelect={useCallback((opt, checked) => setOptions(optionsCurrent => ({
+              ...optionsCurrent,
+              [opt]: checked
+            })), [setOptions])} />
             </div>
           </div>
         </motion.section>
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.125 }}
-          className='flex w-full items-center justify-between gap-8 px-8 py-6'
-        >
+        <motion.section initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} transition={{
+        delay: 0.125
+      }} className='flex w-full items-center justify-between gap-8 px-8 py-6'>
           <header>
             <h2 className='text-xl font-bold'>{t('importFiles')}</h2>
             <p className='mt-2 max-w-[420px]'>
@@ -130,119 +131,99 @@ export function OutputPage() {
               </Trans>
             </p>
           </header>
-          <Button
-            onClick={OpenResultsDirectory}
-            style={{ filter: 'hue-rotate(-120deg)' }}
-            className='mx-auto'
-          >
+          <Button onClick={OpenResultsDirectory} style={{
+          filter: 'hue-rotate(-120deg)'
+        }} className='mx-auto'>
             <Icon icon='fa6-solid:folder-open' className='mr-3 h-6 w-6' />
             {t('files')}
           </Button>
         </motion.section>
       </div>
-    </Page.Root>
-  )
-}
-
-function StatSelect(props: {
-  options: Omit<StatOptions, 'theme'>
-  onSelect: (option: string, checked: boolean) => void
+    </Page.Root>;
+});
+const StatSelect = memo(function StatSelect(props: {
+  options: Omit<StatOptions, 'theme'>;
+  onSelect: (option: string, checked: boolean) => void;
 }) {
-  const { t } = useTranslation()
-  return (
-    <Dialog.Root>
+  const {
+    t
+  } = useTranslation();
+  return <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Button style={{ filter: 'hue-rotate(-45deg)' }}>
+        <Button style={{
+        filter: 'hue-rotate(-45deg)'
+      }}>
           <Icon icon='bx:stats' className='mr-3 h-6 w-6' />
           {t('displayStats')}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content title='displayStats' description='statsWillBeDisplayed'>
         <ul className='mt-4 h-72 overflow-y-scroll'>
-          {Object.entries(props.options).map(([opt, checked]) => (
-            <li key={opt}>
-              <button
-                className='flex w-full cursor-pointer items-center px-2 py-1 text-lg hover:bg-white hover:bg-opacity-[.075]'
-                onClick={() => props.onSelect(opt, !checked)}
-              >
+          {Object.entries(props.options).map(([opt, checked]) => <li key={opt}>
+              <button className='flex w-full cursor-pointer items-center px-2 py-1 text-lg hover:bg-white hover:bg-opacity-[.075]' onClick={() => props.onSelect(opt, !checked)}>
                 <Checkbox checked={props.options[opt] === true} readOnly />
                 <span className='ml-2 cursor-pointer text-center capitalize'>{opt}</span>
               </button>
-            </li>
-          ))}
+            </li>)}
         </ul>
       </Dialog.Content>
-    </Dialog.Root>
-  )
-}
-
-function ThemeSelect(props: { value: string; onSelect: (theme: string) => void }) {
-  const [themes, setThemes] = React.useState<model.Theme[]>([])
-  const [isOpen, setOpen] = React.useState(false)
-  const setError = useErrorPopup()
-
+    </Dialog.Root>;
+});
+const ThemeSelect = memo(function ThemeSelect(props: {
+  value: string;
+  onSelect: (theme: string) => void;
+}) {
+  const [themes, setThemes] = React.useState<model.Theme[]>([]);
+  const isOpen = React.useState(false);
+  const setError = useErrorPopup();
   React.useEffect(() => {
-    GetThemes().then(setThemes).catch(setError)
-  }, [])
-
+    GetThemes().then(setThemes).catch(setError);
+  }, []);
   React.useEffect(() => {
-    if (!isOpen) {
-      return
+    if (!isOpen.current) {
+      return;
     }
     for (const theme of themes) {
-      const container = document.querySelector(`.${theme.name}-preview`)
+      const container = document.querySelector(`.${theme.name}-preview`);
       if (!container) {
-        continue
+        continue;
       }
-      const shadowRoot = container.attachShadow({ mode: 'open' })
-      createRoot(shadowRoot).render(
-        <div className='stat-list'>
+      const shadowRoot = container.attachShadow({
+        mode: 'open'
+      });
+      createRoot(shadowRoot).render(<div className='stat-list'>
           <style>{theme.css}</style>
           <div className='stat-item'>
             <span className='stat-title'>MR</span>
             <span className='stat-value'>444</span>
           </div>
-        </div>
-      )
+        </div>);
     }
-  }, [isOpen, themes])
-
-  return (
-    <Dialog.Root onOpenChange={setOpen}>
+  }, [isOpen.current, themes]);
+  return <Dialog.Root onOpenChange={setOpen}>
       <Dialog.Trigger asChild>
-        <Button
-          className='capitalize'
-          style={{ filter: 'hue-rotate(-180deg)', justifyContent: 'center' }}
-        >
+        <Button className='capitalize' style={{
+        filter: 'hue-rotate(-180deg)',
+        justifyContent: 'center'
+      }}>
           <Icon icon='ph:paint-bucket-fill' className='mr-3 h-6 w-6' />
           {props.value}
         </Button>
       </Dialog.Trigger>
       <Dialog.Content title='selectTheme'>
         <ul className='mt-2 grid h-80 w-full gap-4 overflow-y-scroll pr-2'>
-          {themes.map(theme => (
-            <li key={theme.name}>
+          {themes.map(theme => <li key={theme.name}>
               <div className='mb-4 flex px-2 hover:bg-white hover:bg-opacity-[.075]'>
-                <Checkbox
-                  id={`${theme.name}-checkbox`}
-                  checked={theme.name === props.value}
-                  onChange={e => props.onSelect(theme.name)}
-                  className="my-2"
-                />
-                <label
-                  htmlFor={`${theme.name}-checkbox`}
-                  className='font-spartan w-full cursor-pointer py-2 text-lg font-bold capitalize'
-                >
+                <Checkbox id={`${theme.name}-checkbox`} checked={theme.name === props.value} onChange={e => props.onSelect(theme.name)} className="my-2" />
+                <label htmlFor={`${theme.name}-checkbox`} className='font-spartan w-full cursor-pointer py-2 text-lg font-bold capitalize'>
                   {theme.name}
                 </label>
               </div>
               <div className={`${theme.name}-preview`}>
                 <style>{theme.css.match(/@import.*;/g)}</style>
               </div>
-            </li>
-          ))}
+            </li>)}
         </ul>
       </Dialog.Content>
-    </Dialog.Root>
-  )
-}
+    </Dialog.Root>;
+});
