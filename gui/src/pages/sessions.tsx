@@ -1,57 +1,47 @@
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { useLoaderData, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-
-import * as Page from '@/ui/page'
-import * as Table from '@/ui/table'
-
-import type { model } from '@model'
-
-type MonthGroup = Record<string, model.Session[]>
-type YearGroup = Record<string, MonthGroup>
-
-export function SessionsListPage() {
-  const sessions = (useLoaderData() ?? []) as model.Session[]
-  const { i18n, t } = useTranslation()
-  const navigate = useNavigate()
-
+import { memo } from "react";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLoaderData, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import * as Page from '@/ui/page';
+import * as Table from '@/ui/table';
+import type { model } from '@model';
+type MonthGroup = Record<string, model.Session[]>;
+type YearGroup = Record<string, MonthGroup>;
+export const SessionsListPage = memo(function SessionsListPage() {
+  const sessions = ((useLoaderData() ?? []) as model.Session[]);
+  const {
+    i18n,
+    t
+  } = useTranslation();
+  const navigate = useNavigate();
   const groupedSessions: YearGroup = sessions.reduce((group, sesh) => {
-    const date = new Date(sesh.createdAt)
-    const year = date.getFullYear()
-    const month = date.getMonth() + 1
-
-    group[year] = group[year] ?? {}
-    group[year][month] = group[year][month] ?? []
-    group[year][month].push(sesh)
-
-    return group
-  }, {})
-
-  return (
-    <Page.Root>
+    const date = new Date(sesh.createdAt);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    group[year] = group[year] ?? {};
+    group[year][month] = group[year][month] ?? [];
+    group[year][month].push(sesh);
+    return group;
+  }, {});
+  return <Page.Root>
       <Page.Header>
         <Page.Title>{t('sessions')}</Page.Title>
       </Page.Header>
       <Table.Page>
-        {Object.keys(groupedSessions)
-          .reverse()
-          .map(year => (
-            <motion.section
-              key={year}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.125 }}
-            >
+        {Object.keys(groupedSessions).reverse().map(year => <motion.section key={year} initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} transition={{
+        delay: 0.125
+      }}>
               <h2 className='mt-2 text-4xl'>{year}</h2>
-              {Object.keys(groupedSessions[year])
-                .reverse()
-                .map(month => (
-                  <section key={month}>
+              {Object.keys(groupedSessions[year]).reverse().map(month => <section key={month}>
                     <h3 className='mt-2 text-2xl'>
                       {Intl.DateTimeFormat(i18n.resolvedLanguage, {
-                        month: 'long'
-                      }).format(new Date(`2024-${Number(month) < 10 ? '0' + month : month}-01`))}
+              month: 'long'
+            }).format(new Date(`2024-${Number(month) < 10 ? '0' + month : month}-01`))}
                     </h3>
                     <Table.Content>
                       <thead>
@@ -65,23 +55,15 @@ export function SessionsListPage() {
                         </Table.Tr>
                       </thead>
                       <tbody>
-                        {groupedSessions[year][month].map(sesh => (
-                          <Table.Tr
-                            key={sesh.id}
-                            className='cursor-pointer group'
-                            onClick={() => navigate(`/sessions/${sesh.id}/matches`)}
-                          >
+                        {groupedSessions[year][month].map(sesh => <Table.Tr key={sesh.id} className='cursor-pointer group' onClick={() => navigate(`/sessions/${sesh.id}/matches`)}>
                             <Table.Td>
                               <time dateTime={sesh.createdAt}>
-                                {new Date(sesh.createdAt).toLocaleDateString(
-                                  i18n.resolvedLanguage,
-                                  {
-                                    day: 'numeric',
-                                    weekday: 'short',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  }
-                                )}
+                                {new Date(sesh.createdAt).toLocaleDateString(i18n.resolvedLanguage, {
+                      day: 'numeric',
+                      weekday: 'short',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
                               </time>
                             </Table.Td>
                             <Table.Td>{sesh.userName}</Table.Td>
@@ -93,15 +75,11 @@ export function SessionsListPage() {
                             </Table.Td>
                             <Table.Td className='text-center'>{sesh.matchesWon}</Table.Td>
                             <Table.Td className='text-center'>{sesh.matchesLost}</Table.Td>
-                          </Table.Tr>
-                        ))}
+                          </Table.Tr>)}
                       </tbody>
                     </Table.Content>
-                  </section>
-                ))}
-            </motion.section>
-          ))}
+                  </section>)}
+            </motion.section>)}
       </Table.Page>
-    </Page.Root>
-  )
-}
+    </Page.Root>;
+});

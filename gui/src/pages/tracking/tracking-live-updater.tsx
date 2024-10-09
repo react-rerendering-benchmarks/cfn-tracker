@@ -1,17 +1,17 @@
-import { motion } from 'framer-motion'
-import { Icon } from '@iconify/react'
-import { useTranslation } from 'react-i18next'
-import { useSelector } from '@xstate/react'
-import { PieChart } from 'react-minimal-pie-chart'
-
-import { TrackingMachineContext } from '@/state/tracking-machine'
-import { Button } from '@/ui/button'
-import * as Page from '@/ui/page'
-
-export function TrackingLiveUpdater() {
-  const { t } = useTranslation()
-  const trackingActor = TrackingMachineContext.useActorRef()
-
+import { memo } from "react";
+import { motion } from 'framer-motion';
+import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
+import { useSelector } from '@xstate/react';
+import { PieChart } from 'react-minimal-pie-chart';
+import { TrackingMachineContext } from '@/state/tracking-machine';
+import { Button } from '@/ui/button';
+import * as Page from '@/ui/page';
+export const TrackingLiveUpdater = memo(function TrackingLiveUpdater() {
+  const {
+    t
+  } = useTranslation();
+  const trackingActor = TrackingMachineContext.useActorRef();
   const {
     cfn,
     lp,
@@ -27,20 +27,21 @@ export function TrackingLiveUpdater() {
     character,
     opponentLeague,
     result
-  } = useSelector(trackingActor, ({ context }) => context.trackingState)
-
-  return (
-    <Page.Root>
+  } = useSelector(trackingActor, ({
+    context
+  }) => context.trackingState);
+  return <Page.Root>
       <Page.Header>
         <Page.Title>{t('tracking')}</Page.Title>
         <Page.LoadingIcon />
       </Page.Header>
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.125 }}
-        className='h-full px-6 pt-4'
-      >
+      <motion.section initial={{
+      opacity: 0
+    }} animate={{
+      opacity: 1
+    }} transition={{
+      delay: 0.125
+    }} className='h-full px-6 pt-4'>
         <dl className='flex w-full items-center justify-between whitespace-nowrap'>
           <SmallStat text='CFN' value={cfn} />
           <div className='flex justify-between gap-8'>
@@ -64,48 +65,31 @@ export function TrackingLiveUpdater() {
                 <BigStat text={t('mrGain')} value={`${mrGain > 0 ? `+` : ``}${mrGain}`} />
               </div>
             </dl>
-            {opponent != '' && (
-              <div className='group flex items-center justify-between rounded-xl bg-slate-50 bg-opacity-5 p-3 pb-2 text-lg leading-none'>
+            {opponent != '' && <div className='group flex items-center justify-between rounded-xl bg-slate-50 bg-opacity-5 p-3 pb-2 text-lg leading-none'>
                 <span>{t('lastMatch')}</span>
                 <div className='relative flex items-center gap-2'>
-                  <Icon
-                    icon={result ? 'twemoji:victory-hand' : 'twemoji:pensive-face'}
-                    width={25}
-                  />{' '}
+                  <Icon icon={result ? 'twemoji:victory-hand' : 'twemoji:pensive-face'} width={25} />{' '}
                   vs
                   <b>{opponent}</b> - {opponentCharacter} ({opponentLeague})
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.35 }}
-            className='relative h-full w-full max-w-[220px] gap-5 pt-8 text-center'
-          >
-            <PieChart
-              className='clip-circle animate-enter mx-auto h-[150px] w-[150px]'
-              animate
-              animationDuration={750}
-              lineWidth={85}
-              paddingAngle={0}
-              viewBoxSize={[60, 60]}
-              center={[30, 30]}
-              animationEasing='ease-in-out'
-              data={[
-                {
-                  title: t('wins'),
-                  value: wins,
-                  color: 'rgba(0, 255, 77, .65)'
-                },
-                {
-                  title: t('losses'),
-                  value: wins == 0 && losses == 0 ? 1 : losses,
-                  color: 'rgba(251, 73, 73, 0.25)'
-                }
-              ]}
-            >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          delay: 0.35
+        }} className='relative h-full w-full max-w-[220px] gap-5 pt-8 text-center'>
+            <PieChart className='clip-circle animate-enter mx-auto h-[150px] w-[150px]' animate animationDuration={750} lineWidth={85} paddingAngle={0} viewBoxSize={[60, 60]} center={[30, 30]} animationEasing='ease-in-out' data={[{
+            title: t('wins'),
+            value: wins,
+            color: 'rgba(0, 255, 77, .65)'
+          }, {
+            title: t('losses'),
+            value: wins == 0 && losses == 0 ? 1 : losses,
+            color: 'rgba(251, 73, 73, 0.25)'
+          }]}>
               <defs>
                 <linearGradient id='blue-gradient' direction={-65}>
                   <stop offset='0%' stopColor='#20BF55' />
@@ -117,39 +101,33 @@ export function TrackingLiveUpdater() {
                 </linearGradient>
               </defs>
             </PieChart>
-            <Button
-              className='absolute bottom-0 right-0'
-              onClick={() => trackingActor.send({ type: 'cease' })}
-            >
+            <Button className='absolute bottom-0 right-0' onClick={() => trackingActor.send({
+            type: 'cease'
+          })}>
               <Icon icon='fa6-solid:stop' className='mr-3 h-5 w-5' />
               {t('stop')}
             </Button>
           </motion.div>
         </div>
-        <img
-          className='pointer-events-none absolute -right-20 top-0 z-[-1] h-full opacity-10 grayscale'
-          src={`https://www.streetfighter.com/6/buckler/assets/images/material/character/character_${character
-            .toLowerCase()
-            .replace(/\s/g, '')
-            .replace('.', '')}_r.png`}
-          alt={character}
-        />
+        <img className='pointer-events-none absolute -right-20 top-0 z-[-1] h-full opacity-10 grayscale' src={`https://www.streetfighter.com/6/buckler/assets/images/material/character/character_${character.toLowerCase().replace(/\s/g, '').replace('.', '')}_r.png`} alt={character} />
       </motion.section>
-    </Page.Root>
-  )
-}
-
-type StatProps = { text: string; value: string | number }
-const BigStat = ({ text, value }: StatProps) => (
-  <div className='mb-2 flex flex-1 justify-between gap-4 rounded-xl bg-slate-50 bg-opacity-5 p-3 pb-1'>
+    </Page.Root>;
+});
+type StatProps = {
+  text: string;
+  value: string | number;
+};
+const BigStat = ({
+  text,
+  value
+}: StatProps) => <div className='mb-2 flex flex-1 justify-between gap-4 rounded-xl bg-slate-50 bg-opacity-5 p-3 pb-1'>
     <dt className='font-extralight tracking-wider'>{text}</dt>
     <dd className='text-4xl font-semibold'>{value}</dd>
-  </div>
-)
-
-const SmallStat = ({ text, value }: StatProps) => (
-  <div className='flex gap-3 text-2xl'>
+  </div>;
+const SmallStat = ({
+  text,
+  value
+}: StatProps) => <div className='flex gap-3 text-2xl'>
     <dt className='text-xl leading-8'>{text}</dt>
     <dd className='font-bold'>{value}</dd>
-  </div>
-)
+  </div>;
